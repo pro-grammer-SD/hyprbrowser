@@ -1,54 +1,84 @@
 # HyprBrowser Installation Guide
 
-Complete step-by-step instructions for building and installing HyprBrowser on Windows, Linux, and macOS.
+Complete step-by-step instructions for building and installing HyprBrowser on Windows, Linux, and macOS using Tauri.
 
 ## Table of Contents
 
 - [System Requirements](#system-requirements)
-- [Linux Installation](#linux-installation)
 - [Windows Installation](#windows-installation)
+- [Linux Installation](#linux-installation)
 - [macOS Installation](#macos-installation)
 - [Building from Source](#building-from-source)
-- [Post-Installation](#post-installation)
 - [Troubleshooting](#troubleshooting)
 
 ## System Requirements
 
 ### Minimum Requirements
-- **Rust**: 1.70 or newer ([Install](https://www.rust-lang.org/tools/install))
+- **Rust**: 1.70 or newer ([Install](https://rustup.rs/))
 - **RAM**: 2GB
-- **Disk Space**: 500MB (for build artifacts)
-- **GPU**: Any modern GPU with Vulkan/DirectX 12/Metal support
+- **Disk Space**: 1GB (for build artifacts)
+- **Internet**: For downloading dependencies
 
-### Optional
-- **Git**: For cloning the repository
-- **GitHub CLI**: For easier dependency management
+### Platform-Specific Requirements
 
-## Linux Installation
+**Windows 10+**
+- WebView2 Runtime ([Install](https://developer.microsoft.com/en-us/microsoft-edge/webview2/))
 
-### Ubuntu/Debian
+**Linux (Ubuntu/Debian/Fedora)**
+- GTK 3.0+ development libraries
+- WebKit runtime
 
-```bash
-# 1. Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
+**macOS 10.15+**
+- Xcode Command Line Tools
+- WKWebView (included in macOS)
 
-# 2. Install dependencies
-sudo apt update
-sudo apt install -y \
-    build-essential \
-    pkg-config \
-    libssl-dev \
-    librust-alsa-sys-dev \
-    libasound2-dev
+## Windows Installation
 
-# 3. Clone HyprBrowser
+### Step 1: Install Rust
+
+```powershell
+# Download and run installer from https://rustup.rs/
+# Or use:
+Invoke-WebRequest -Uri https://win.rustup.rs -OutFile rustup.exe
+.\rustup.exe
+```
+
+Verify installation:
+```powershell
+rustc --version
+cargo --version
+```
+
+### Step 2: Install WebView2 (Required)
+
+Download from: https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+
+Or install via package manager:
+```powershell
+winget install Microsoft.WebView2Runtime
+```
+
+### Step 3: Clone Repository
+
+```powershell
 git clone https://github.com/pro-grammer-SD/hyprbrowser
 cd hyprbrowser
+```
 
-# 4. Build and run
-cargo run --release
+### Step 4: Build Using build.ps1
 
+```powershell
+# Release build (optimized)
+.\build.ps1 release
+
+# Or debug build
+.\build.ps1 debug
+
+# Or build and run
+.\build.ps1 run
+```
+
+**Output**: `target/release/hyprbrowser.exe` (3MB optimized binary)
 # 5. Install to system (optional)
 cargo install --path .
 # Then run: hyprbrowser

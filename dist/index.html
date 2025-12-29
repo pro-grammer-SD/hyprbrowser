@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyprBrowser</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        @font-face {
+            font-family: 'HyprFont';
+            src: url('font.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'HyprFont', sans-serif;
+        }
+
+        body {
+            background: transparent;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.95));
+            backdrop-filter: blur(10px);
+            -webkit-app-region: drag;
+            border-radius: 12px;
+        }
+
+        /* Titlebar */
+        .titlebar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-app-region: drag;
+        }
+
+        .titlebar-icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .titlebar-title {
+            flex: 1;
+            font-weight: 600;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .titlebar-controls {
+            display: flex;
+            gap: 10px;
+            -webkit-app-region: no-drag;
+        }
+
+        .title-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .title-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .title-btn.close:hover {
+            background: #ff4444;
+            color: #ffffff;
+        }
+
+        /* Main container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 120px;
+            background: rgba(10, 10, 20, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 8px;
+            border: none;
+            background: transparent;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        .sidebar-btn:hover {
+            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-btn.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+        }
+
+        /* Browser area */
+        .browser-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: transparent;
+        }
+
+        /* Tab bar */
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            padding: 8px 10px;
+            background: rgba(20, 20, 30, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            align-items: center;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab:hover {
+            background: rgba(60, 60, 80, 0.9);
+            color: #e0e0e0;
+        }
+
+        .tab.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .tab-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 4px;
+            font-size: 10px;
+        }
+
+        .tab-close:hover {
+            color: #ff4444;
+        }
+
+        /* Address bar */
+        .address-bar {
+            display: flex;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(20, 20, 30, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(40, 40, 60, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            background: rgba(40, 40, 70, 0.95);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+
+        .url-input::placeholder {
+            color: #606070;
+        }
+
+        .nav-btn {
+            padding: 8px 12px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(60, 60, 80, 0.9);
+            color: #e0e0e0;
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        /* Webview */
+        .webview-container {
+            flex: 1;
+            background: #000000;
+            border-radius: 12px 0 0 0;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        webview {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Panel container */
+        .panel-container {
+            width: 300px;
+            background: rgba(10, 10, 20, 0.95);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(300px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .panel-content {
+            padding: 16px;
+        }
+
+        .panel-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(40, 40, 60, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            color: #a0a0a0;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .panel-item:hover {
+            background: rgba(60, 60, 80, 0.8);
+            color: #e0e0e0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Quick search */
+        .quick-search {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            background: rgba(20, 20, 30, 0.98);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .quick-search-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(40, 40, 60, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .quick-search-result {
+            color: #00ff88;
+            font-size: 12px;
+            padding: 4px 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Titlebar -->
+        <div class="titlebar">
+            <div style="display: flex; align-items: center;">
+                <span class="titlebar-icon">🚀</span>
+                <span class="titlebar-title">HyprBrowser</span>
+            </div>
+            <div class="titlebar-controls">
+                <button class="title-btn" id="minimize-btn">−</button>
+                <button class="title-btn" id="maximize-btn">□</button>
+                <button class="title-btn close" id="close-btn">✕</button>
+            </div>
+        </div>
+
+        <!-- Main container -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <button class="sidebar-btn active" data-panel="browser">
+                    <span class="sidebar-icon">🏠</span>
+                    Home
+                </button>
+                <button class="sidebar-btn" data-panel="downloads">
+                    <span class="sidebar-icon">⬇</span>
+                    Downloads
+                </button>
+                <button class="sidebar-btn" data-panel="history">
+                    <span class="sidebar-icon">🕐</span>
+                    History
+                </button>
+                <button class="sidebar-btn" data-panel="modules">
+                    <span class="sidebar-icon">📦</span>
+                    Modules
+                </button>
+                <button class="sidebar-btn" data-panel="workflow">
+                    <span class="sidebar-icon">⚙</span>
+                    Workflow
+                </button>
+                <button class="sidebar-btn" data-panel="keybindings">
+                    <span class="sidebar-icon">⌨</span>
+                    Keys
+                </button>
+                <button class="sidebar-btn" data-panel="permissions">
+                    <span class="sidebar-icon">🔒</span>
+                    Perms
+                </button>
+                <button class="sidebar-btn" data-panel="updater">
+                    <span class="sidebar-icon">⬆</span>
+                    Update
+                </button>
+            </div>
+
+            <!-- Browser area -->
+            <div class="browser-area">
+                <!-- Tab bar -->
+                <div class="tab-bar" id="tab-bar">
+                    <button class="tab active" data-tab="0">
+                        <span>Google</span>
+                        <button class="tab-close">✕</button>
+                    </button>
+                </div>
+
+                <!-- Address bar -->
+                <div class="address-bar">
+                    <button class="nav-btn">⬅</button>
+                    <button class="nav-btn">🔄</button>
+                    <input type="text" class="url-input" id="url-input" placeholder="https://www.google.com" value="https://www.google.com">
+                    <button class="nav-btn">⋮</button>
+                </div>
+
+                <!-- Webview -->
+                <div class="webview-container" id="webview-container"></div>
+            </div>
+
+            <!-- Panel (hidden by default) -->
+            <div class="panel-container" id="panel" style="display: none;">
+                <div class="panel-header" id="panel-header">Panel</div>
+                <div class="panel-content" id="panel-content"></div>
+            </div>
+        </div>
+
+        <!-- Quick search (hidden) -->
+        <div class="quick-search" id="quick-search" style="display: none;">
+            <input type="text" class="quick-search-input" id="quick-search-input" placeholder="🔍 Search or calculate...">
+            <div class="quick-search-result" id="quick-search-result"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

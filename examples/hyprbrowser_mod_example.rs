@@ -1,5 +1,3 @@
-use iced::widget::{column, row, container, text, checkbox};
-use iced::{Element, Alignment, Length};
 use serde_json::json;
 use anyhow::Result;
 
@@ -16,34 +14,24 @@ impl ExampleModule {
         ExampleModule {
             name: "Example Module".to_string(),
             version: "1.0.0".to_string(),
-            description: "Example module demonstrating custom panel and settings".to_string(),
+            description: "Example module demonstrating custom Tauri module".to_string(),
             enabled: true,
             dark_mode: false,
         }
     }
 
-    pub fn render_panel(&self) -> Element<'static, String> {
-        let toggle = row![
-            text("Dark Mode").size(12),
-            checkbox("Enable dark theme", self.dark_mode),
-        ]
-        .spacing(8)
-        .align_items(Alignment::Center);
-
-        let info = column![
-            text("Example Module").size(14),
-            text(format!("v{}", self.version)).size(10),
-            text(&self.description).size(11),
-            toggle,
-        ]
-        .spacing(8)
-        .padding(12);
-
-        container(info)
-            .width(Length::Fill)
-            .height(Length::Shrink)
-            .padding(8)
-            .into()
+    /// Render module UI configuration as JSON for Tauri webview
+    pub fn render_panel(&self) -> serde_json::Value {
+        json!({
+            "name": self.name,
+            "version": self.version,
+            "description": self.description,
+            "enabled": self.enabled,
+            "dark_mode": self.dark_mode,
+            "settings": {
+                "dark_theme": self.dark_mode,
+            }
+        })
     }
 
     pub fn on_key_press(&mut self, _key: u32) -> Option<String> {
@@ -91,9 +79,15 @@ fn main() {
     if let Err(e) = module.load_state() {
         eprintln!("failed to load module state: {}", e);
     }
-    let _panel: Element<'static, String> = module.render_panel();
+    
+    // Render module UI configuration as JSON (sent to Tauri webview)
+    let config = module.render_panel();
+    
     if let Err(e) = module.save_state() {
         eprintln!("failed to save module state: {}", e);
     }
-    println!("ExampleModule initialized. dark_mode={}", module.dark_mode);
+    
+    println!("ExampleModule initialized");
+    println!("Config: {}", serde_json::to_string_pretty(&config).unwrap());
+    println!("dark_mode={}", module.dark_mode);
 }

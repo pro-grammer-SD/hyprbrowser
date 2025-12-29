@@ -1,81 +1,78 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use crate::theme::ThemeMode;
+use std::fs;
+use crate::downloads::Download;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct State {
-    pub window_size: Option<(u32, u32)>,
-    pub theme_mode: ThemeMode,
-    pub open_tabs: Vec<String>,
-    pub current_tab_index: usize,
+pub struct AppState {
+    pub tabs: Vec<TabState>,
+    pub current_tab: usize,
+    pub theme: ThemeMode,
     pub adblock_enabled: bool,
     pub vpn_enabled: bool,
+    pub downloads: Vec<Download>,
 }
 
-impl State {
-    pub fn new() -> Self {
-        State {
-            window_size: Some((1280, 720)),
-            theme_mode: ThemeMode::System,
-            open_tabs: vec!["https://www.google.com".to_string()],
-            current_tab_index: 0,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TabState {
+    pub url: String,
+    pub title: String,
+    pub pinned: bool,
+    pub incognito: bool,
+    pub history: Vec<String>,
+    pub history_pos: usize,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum ThemeMode {
+    Light,
+    Dark,
+    System,
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self {
+            tabs: vec![TabState {
+                url: "https://www.google.com".to_string(),
+                title: "Google".to_string(),
+                pinned: false,
+                incognito: false,
+                history: vec!["https://www.google.com".to_string()],
+                history_pos: 0,
+            }],
+            current_tab: 0,
+            theme: ThemeMode::System,
             adblock_enabled: true,
             vpn_enabled: false,
+            downloads: vec![],
         }
     }
+}
 
-    pub fn load() -> anyhow::Result<Self> {
-        let state_dir = Self::get_state_dir()?;
-        let state_file = state_dir.join("state.json");
-
-        if state_file.exists() {
-            let contents = std::fs::read_to_string(&state_file)?;
-            let state = serde_json::from_str(&contents)?;
-            Ok(state)
+impl AppState {
+    pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
+        let state_path = Self::state_path()?;
+        if state_path.exists() {
+            let content = fs::read_to_string(state_path)?;
+            Ok(serde_json::from_str(&content)?)
         } else {
-            Ok(State::new())
+            Ok(Self::default())
         }
     }
 
-    pub fn save(&self) -> anyhow::Result<()> {
-        let state_dir = Self::get_state_dir()?;
-        std::fs::create_dir_all(&state_dir)?;
-
-        let state_file = state_dir.join("state.json");
-        let contents = serde_json::to_string_pretty(self)?;
-        std::fs::write(&state_file, contents)?;
-
+    pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let state_path = Self::state_path()?;
+        fs::create_dir_all(state_path.parent().unwrap())?;
+        fs::write(state_path, serde_json::to_string_pretty(self)?)?;
         Ok(())
     }
 
-    pub fn save_browser_state(browser: &crate::browser::BrowserState) -> anyhow::Result<()> {
-        let state_dir = Self::get_state_dir()?;
-        std::fs::create_dir_all(&state_dir)?;
-
-        let mut state = State::load().unwrap_or_else(|_| State::new());
-        state.theme_mode = browser.theme_mode;
-        state.adblock_enabled = browser.adblock_enabled;
-        state.vpn_enabled = browser.vpn_enabled;
-
-        state.save()?;
-        Ok(())
-    }
-
-    pub fn save_theme(theme_mode: &ThemeMode) -> anyhow::Result<()> {
-        let state_dir = Self::get_state_dir()?;
-        std::fs::create_dir_all(&state_dir)?;
-
-        let mut state = State::load().unwrap_or_else(|_| State::new());
-        state.theme_mode = *theme_mode;
-
-        state.save()?;
-        Ok(())
-    }
-
-    fn get_state_dir() -> anyhow::Result<PathBuf> {
-        let data_dir = dirs::data_dir()
-            .ok_or_else(|| anyhow::anyhow!("Cannot find data directory"))?;
-
-        Ok(data_dir.join("hyprbrowser"))
+    fn state_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+        let exec_dir = std::env::current_exe()?
+            .parent()
+            .ok_or("Cannot determine executable directory")?
+            .to_path_buf();
+        Ok(exec_dir.join("data").join("state.json"))
     }
 }

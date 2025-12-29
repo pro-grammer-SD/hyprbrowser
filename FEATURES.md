@@ -1,6 +1,6 @@
 # HyprBrowser Features
 
-Complete documentation of all HyprBrowser features and how to use them.
+Complete documentation of all HyprBrowser features and how to use them. Built with Tauri + WebView2 + HTML5.
 
 ## Table of Contents
 

@@ -1,69 +1,93 @@
-# HyprBrowser - Ultra-Fast, Hyprland-Style Browser in Rust
+# HyprBrowser - Modern Desktop Browser
 
-HyprBrowser is a next-generation web browser built with Rust using `iced` + `wgpu`, designed for speed, aesthetics, and extensibility. It features a minimalistic yet powerful UI inspired by Hyprland, with full keyboard-driven navigation, modular extensions, and advanced productivity features.
+HyprBrowser is a next-generation web browser built with **Rust + Tauri + WebView2**, featuring a beautiful Hyprland-inspired UI, full keyboard-driven navigation, modular extensions, and professional productivity features.
+
+## 🎯 Stack
+
+- **Framework**: Tauri 1.5 (cross-platform desktop)
+- **Frontend**: HTML5 + CSS3 + Vanilla JavaScript
+- **Backend**: Rust with 30+ IPC commands
+- **Browser Engine**: WebView2 (Windows), WKWebView (macOS), WebKit (Linux)
+- **Data**: JSON state files + SQLite for history
 
 ## 🚀 Features
 
 ### Core Browser
+- **Tauri + WebView2**: Native desktop app with real browser engine
+- **Tab Management**: Create, close, duplicate, pin tabs with incognito mode
+- **Smart Navigation**: URL input with validation, back/forward/reload buttons
+- **Transparent Window**: Hyprland-style design with rounded corners and blur effects
+- **Custom Titlebar**: Window controls with custom styling
+- **Quick Search** (Shift+Tab): Built-in calculator with math evaluation
+- **Adblock & VPN**: Toggle ad-blocking and VPN features
 
-- **Borderless, Transparent Window**: Hyprland-style design with rounded corners and smooth animations
-- **Tabbed Browsing**: Pill-shaped tabs with favicon, title, pin/unpin, and close buttons
-- **Pinned Tabs**: Pin important tabs to the sidebar for quick access
-- **Multi-Panel Support**: View multiple tabs side-by-side with auto-layout
-- **Quick Search Bar** (Shift+Tab): Instant Google search + built-in calculator
-- **Snow Easter Egg**: Type `letitsnow` for 5 seconds of falling snow ❄️
-- **Adblock & Tracker Blocking** (Shift+B): Built-in adblock engine
-- **VPN Toggle**: Quick VPN enable/disable
-- **Incognito Mode** (Shift+Ctrl+T): Private browsing
+### Sidebar Panels (8 Total)
+- 🏠 **Home**: Dashboard and quick links
+- ⬇ **Downloads**: Download manager with pause/resume
+- 🕐 **History**: Browsing history with search
+- 📦 **Modules**: Extension marketplace (GitHub-powered)
+- ⚙ **Workflow**: Automation and theme settings
+- ⌨ **Keybindings**: Customize all shortcuts
+- 🔒 **Permissions**: Site permissions and privacy
+- ⬆ **Updater**: Auto-update from GitHub releases
 
-### Panels & Sidebar
+### Extensions & Customization
+- **Module System**: Install modules from GitHub repositories
+- **GitHub Search**: Discover modules via `topic:hyprbrowser-module`
+- **Auto-Updater**: One-click update installation from GitHub Releases
+- **State Persistence**: Automatic save/restore of tabs and settings
+- **Customizable Keybindings**: Map any action to keyboard shortcuts
 
-- **Downloads Panel**: Pause, resume, cancel downloads with parallel toggle
-- **History Panel**: Browse, search, and clear browsing history
-- **Modules Panel**: Discover, install, enable/disable, and manage extensions
-- **Workflow Panel**: Theme selection (Light/Dark/System), state save/restore
-- **Keybindings Panel**: View and customize all keyboard shortcuts
-- **Permissions Panel**: Manage site permissions (camera, mic, location, etc.)
-- **Updater Panel**: Check for updates and auto-install releases
+### Keyboard Shortcuts
+- `Shift+T` - New tab
+- `Shift+Ctrl+T` - Incognito tab
+- `Shift+D` - Duplicate tab
+- `Shift+O` - Close other tabs
+- `Shift+U` - Focus URL input
+- `Shift+H` - Home (Google)
+- `Shift+Tab` - Quick search
+- `Shift+B` - Menu
 
-### Extensibility
-
-- **Module System**: Write Rust modules to extend functionality
-- **GitHub Integration**: Auto-discover modules via `hyprbrowser_mod_<name>` pattern
-- **Local Upload**: Upload custom `.rs` modules directly
-- **Dynamic Loading**: Reload modules without restarting
-
-### Developer Tools
-
-- **Built-in Console**: View logs and debug info
-- **Network Inspector**: Monitor HTTP requests and responses
-- **Element Inspector**: Inspect page structure
-
-## 📋 Installation & Setup
+## 📋 Quick Start
 
 ### Prerequisites
+- Rust 1.70+ ([Install Rust](https://rustup.rs/))
+- Windows 10+ (requires WebView2) or macOS/Linux with system WebKit
 
-- Rust 1.70+ ([Install Rust](https://www.rust-lang.org/tools/install))
-- Git
-- Cargo (comes with Rust)
+### Build Using build.ps1
 
-### Build from Source
+```powershell
+cd c:\Users\Soumalya\Desktop\programming\github_repos\hyprbrowser
 
-```bash
-# Clone the repository
-git clone https://github.com/hyperbrowser/hyprbrowser
-cd hyprbrowser
+# Release build (optimized, 3MB binary)
+.\build.ps1 release
 
-# Build in release mode (optimized)
-cargo build --release
+# Debug build (faster compilation)
+.\build.ps1 debug
 
-# Run the browser
-cargo run --release
+# Build and run immediately
+.\build.ps1 run
 
-# Executable will be in: ./dist/hyprbrowser
+# Clean build artifacts first
+.\build.ps1 release clean
 ```
 
-### Cross-Platform
+### Alternative: Direct Cargo Commands
+
+```bash
+# Release build
+cargo build --release
+
+# Debug build
+cargo build
+
+# Run directly
+cargo run
+```
+
+**Output Locations**:
+- Debug: `target/debug/hyprbrowser.exe`
+- Release: `target/release/hyprbrowser.exe` (~3MB, optimized)### Cross-Platform
 
 HyprBrowser builds on:
 

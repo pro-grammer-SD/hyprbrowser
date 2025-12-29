@@ -1,0 +1,46 @@
+{
+  "build": {
+    "beforeBuildCommand": "",
+    "beforeDevCommand": "",
+    "devPath": "./dist",
+    "distDir": "./dist"
+  },
+  "package": {
+    "productName": "HyprBrowser",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "window": {
+        "all": true
+      },
+      "shell": {
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": ["msi", "nsis"],
+      "identifier": "com.hyprbrowser.app",
+      "icon": ["assets/icon.ico"]
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "HyprBrowser",
+        "width": 1280,
+        "height": 720,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "transparent": true,
+        "decorations": false,
+        "titleBarStyle": "transparent"
+      }
+    ]
+  }
+}
